@@ -241,19 +241,32 @@ void branchAndBound(const Graph &g, int &localBest, double timeLimit,
 
     // Select two non–adjacent vertices for branching.
     int v1 = -1, v2 = -1;
-    bool found = false;
-    for (int i = 0; i < g.n && !found; i++) {
+    int bestScore = -1;
+    for (int i = 0; i < g.n; i++) {
+        int deg_i = 0;
+        for (int x = 0; x < g.n; x++) {
+            if (g.adj[i][x]) deg_i++;
+        }
         for (int j = i + 1; j < g.n; j++) {
             if (!g.adj[i][j]) {
-                v1 = i;
-                v2 = j;
-                found = true;
-                break;
+                // j is non-adjacent to i
+                int deg_j = 0;
+                for (int x = 0; x < g.n; x++) {
+                    if (g.adj[j][x]) deg_j++;
+                }
+                int score = deg_i + deg_j;
+                if (score > bestScore) {
+                    bestScore = score;
+                    v1 = i;
+                    v2 = j;
+                }
             }
         }
     }
-    if (!found)
-        return; // no branching possible
+    if (v1 == -1) {
+        // No non-adjacent pair found => graph is a clique or no further branching
+        return;
+    }
 
     // Branch 1: merge v1 and v2 (force same color)
     Graph child1 = g.mergeVertices(v1, v2);
