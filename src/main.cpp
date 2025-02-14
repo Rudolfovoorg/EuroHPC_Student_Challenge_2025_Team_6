@@ -147,8 +147,6 @@ int main(int argc, char** argv) {
         string baseName = getBaseName(inputFile);
 
         // Set the output directory to the correct location.
-        // Since run_benchmarks.sh is in project/src,
-        // using "../build/output/" here resolves to project/build/output.
         string outputDir = "../build/output/";
         string outputFileName = outputDir + baseName + ".output";
 
