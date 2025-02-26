@@ -17,14 +17,12 @@ set(SRCS
 
 # Define separate variables for each directory.
 set(BIN_DIR ${CMAKE_BINARY_DIR}/bin)
-set(SEQ_DIR ${CMAKE_BINARY_DIR}/output/sequential)
 set(LOG_DIR ${CMAKE_BINARY_DIR}/output/log)
 set(TXT_DIR ${CMAKE_BINARY_DIR}/output/outTxt)
 set(PLOTS_DIR ${CMAKE_BINARY_DIR}/plots)
 
 # Create both directories.
 file(MAKE_DIRECTORY ${BIN_DIR})
-file(MAKE_DIRECTORY ${SEQ_DIR})
 file(MAKE_DIRECTORY ${LOG_DIR})
 file(MAKE_DIRECTORY ${TXT_DIR})
 file(MAKE_DIRECTORY ${PLOTS_DIR})
