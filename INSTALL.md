@@ -1,4 +1,3 @@
-
 # Installation Guide
 This file explains the installation and setup process.
 
@@ -35,12 +34,14 @@ This generates the executable `solver` in `build/bin/`.
 To execute the solver manually:
 
 ```sh
+export OMP_NUM_THREADS=<num_threads>
 mpirun -np <num_processes> ./bin/solver <input_file> <time_limit_sec>
 ```
 
 Example:
 
 ```sh
+export OMP_NUM_THREADS=256
 mpirun -np 4 ./bin/solver ../instances/anna.col 500
 ```
 
@@ -50,7 +51,7 @@ mpirun -np 4 ./bin/solver ../instances/anna.col 500
 To automate the execution across multiple input files and process configurations, use:
 
 ```sh
-sbatch ./run_benchmarks.sh
+sbatch run_benchmarks.sh
 ```
 
 This script:

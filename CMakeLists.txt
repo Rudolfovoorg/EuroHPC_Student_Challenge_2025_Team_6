@@ -17,12 +17,14 @@ set(SRCS
 
 # Define separate variables for each directory.
 set(BIN_DIR ${CMAKE_BINARY_DIR}/bin)
+set(SEQ_DIR ${CMAKE_BINARY_DIR}/output/sequential)
 set(LOG_DIR ${CMAKE_BINARY_DIR}/output/log)
 set(TXT_DIR ${CMAKE_BINARY_DIR}/output/outTxt)
 set(PLOTS_DIR ${CMAKE_BINARY_DIR}/plots)
 
 # Create both directories.
 file(MAKE_DIRECTORY ${BIN_DIR})
+file(MAKE_DIRECTORY ${SEQ_DIR})
 file(MAKE_DIRECTORY ${LOG_DIR})
 file(MAKE_DIRECTORY ${TXT_DIR})
 file(MAKE_DIRECTORY ${PLOTS_DIR})
@@ -74,6 +76,7 @@ file(APPEND "${RUN_BENCHMARK_SCRIPT}" "#SBATCH --ntasks=\${np}\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "#SBATCH --time=03:00:00\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# Run the solver using srun with np MPI processes\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "export OMP_NUM_THREADS=256\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "srun -n \${np} \${EXECUTABLE} \${file} \${TIME_LIMIT}\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "EOF\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "  done\n")
