@@ -9,6 +9,7 @@ Ensure the following dependencies are installed:
 - **MPI** (e.g., OpenMPI or MPICH)
 - **GCC/G++** (≥ C++17)
 - **OpenMP**
+- **Python**
 
 On Vega supercomputer, load the following:
 
@@ -44,16 +45,32 @@ mpirun -np 4 ./bin/solver ../instances/anna.col 500
 ```
 
 &nbsp;
-## Running Benchmarks
+## I) Running Benchmarks
 
 To automate the execution across multiple input files and process configurations, use:
 
 ```sh
-./run_benchmarks.sh
+sbatch ./run_benchmarks.sh
 ```
 
 This script:
 
 1. Iterates through `instances/`
 2. Runs `solver` with varying MPI process counts (1, 2, 4, 8, 16, 32, 64)
-3. Saves results in `build/output/benchmark_results.csv`
+3. Saves results in `build/output`
+
+
+&nbsp;
+## II) Running analysis
+
+To automate the analysis across multiple input files and process configurations, use:
+
+```sh
+python3 run_scripts.py
+```
+
+This script:
+
+1. Converts `.output` files from `build/output` to  `.txt` files in `build/output/outTxt`
+2. Reads the generated `.txt` files and plots the graphs in `build/plots`
+3. Generates a summary table in `build/configuration_table_sorted.csv`

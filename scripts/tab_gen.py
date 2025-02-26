@@ -1,8 +1,27 @@
 import os
 import pandas as pd
 
-def parse_log_file(filename):
-    """Parses a log file and extracts relevant configuration and performance information."""
+def parse_log_file(filename: str) -> dict:
+    """
+    Parses a log file and extracts configuration and performance information.
+    
+    The log file is expected to contain lines with key-value pairs separated by a colon.
+    The following keys are extracted (if present):
+      - problem_instance_file_name: Name of the problem instance.
+      - number_of_mpi_processes: Number of MPI processes (converted to int).
+      - number_of_threads_per_process: Number of threads per process (converted to int).
+      - wall_time_sec: Wall time in seconds (converted to float).
+      - is_within_time_limit: A flag indicating whether the run is within the time limit.
+      - number_of_colors: Number of colors (converted to int).
+    
+    Parameters:
+        filename (str): The path to the log file.
+    
+    Returns:
+        dict: A dictionary containing the extracted data with keys:
+            "Instance", "MPI Processes", "Threads per Process",
+            "Wall Time (sec)", "Within Time Limit", and "Colors".
+    """
     config_data = {}
     with open(filename, 'r') as f:
         for line in f:
@@ -26,8 +45,26 @@ def parse_log_file(filename):
         "Colors": num_colors
     }
 
-def create_configuration_table(log_files_dir):
-    """Creates a table summarizing all configurations from log files with custom sorting."""
+def create_configuration_table(log_files_dir: str) -> pd.DataFrame:
+    """
+    Creates a sorted configuration table by parsing log files in a given directory.
+    
+    The function reads all files ending with '.txt' in the specified directory,
+    extracts configuration data using `parse_log_file`, and compiles the results into
+    a pandas DataFrame. The DataFrame is then sorted by instance name and MPI process counts.
+    
+    Custom Sorting:
+      - The preferred order for MPI processes is defined as [1, 2, 4, 8, 16, 32, 64].
+      - For each problem instance, the entries are first sorted according to this preferred order.
+      - Any MPI process values not in the preferred list are appended in ascending order.
+    
+    Parameters:
+        log_files_dir (str): The directory containing the log files.
+    
+    Returns:
+        pd.DataFrame: A sorted DataFrame containing configuration data from the log files.
+                      Returns an empty DataFrame if no log files are found.
+    """
     configurations = []
     for filename in os.listdir(log_files_dir):
         if filename.endswith(".txt"):
@@ -41,7 +78,6 @@ def create_configuration_table(log_files_dir):
         # Define the desired MPI process order
         preferred_mpi_order = [1, 2, 4, 8, 16, 32, 64]
 
-        # Group by instance name and then apply custom sorting
         sorted_groups = []
         grouped = df.groupby('Instance')
         for name, group in grouped:
@@ -53,12 +89,14 @@ def create_configuration_table(log_files_dir):
                     sorted_mpi_processes.append(proc)
                     mpi_processes_in_group.remove(proc)
 
-            # Append any remaining MPI processes in ascending order
+            # Append any remaining MPI process values in ascending order
             sorted_mpi_processes.extend(sorted(mpi_processes_in_group))
 
             instance_sorted_group = pd.DataFrame()
             for proc in sorted_mpi_processes:
-                instance_sorted_group = pd.concat([instance_sorted_group, group[group['MPI Processes'] == proc]])
+                instance_sorted_group = pd.concat(
+                    [instance_sorted_group, group[group['MPI Processes'] == proc]]
+                )
             sorted_groups.append(instance_sorted_group)
 
         config_table_df_sorted = pd.concat(sorted_groups).reset_index(drop=True)
@@ -67,14 +105,22 @@ def create_configuration_table(log_files_dir):
         return pd.DataFrame()
 
 if __name__ == "__main__":
-    log_files_directory = "."  # Replace with the actual directory containing your log files
+    """
+    Main execution block.
+    
+    Reads log files from the specified directory, creates a sorted configuration table,
+    and writes the table to a CSV file.
+    
+    Expected log files location: '../build/output/outTxt'
+    Output CSV file: '../build/configuration_table_sorted.csv'
+    """
+    log_files_directory = "../build/output/outTxt"
     config_table_df_sorted = create_configuration_table(log_files_directory)
 
     if not config_table_df_sorted.empty:
-        print(config_table_df_sorted.to_string())  # Print the sorted table to console
-        # Optionally save to CSV or other formats
-        # config_table_df_sorted.to_csv("configuration_table_sorted.csv", index=False)
-        # config_table_df_sorted.to_markdown("configuration_table_sorted.md", index=False) # Requires 'tabulate' package
-        print("\nConfiguration table generated and sorted.")
+        output_filepath = "../build/configuration_table_sorted.csv"
+        config_table_df_sorted.to_csv(output_filepath, index=False)
+        print(config_table_df_sorted.to_string())
+        print(f"\nConfiguration table generated, sorted, and saved to {output_filepath}.")
     else:
         print("No log files found or no data extracted.")
