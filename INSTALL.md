@@ -34,13 +34,13 @@ This generates the executable `solver` in `build/bin/`.
 To execute the solver manually:
 
 ```sh
-mpirun -np <num_processes> ./bin/solver <input_file> <time_limit_sec> [--log]
+mpirun -np <num_processes> ./bin/solver <input_file> <time_limit_sec>
 ```
 
 Example:
 
 ```sh
-mpirun -np 4 ./bin/solver ../instances/anna.col 500 --log
+mpirun -np 4 ./bin/solver ../instances/anna.col 500
 ```
 
 &nbsp;

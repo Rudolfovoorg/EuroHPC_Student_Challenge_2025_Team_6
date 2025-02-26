@@ -5,22 +5,22 @@ project(Solver CXX)
 set(CMAKE_CXX_COMPILER mpic++)
 
 # Append necessary compile flags.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -fopenmp -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fopenmp -std=c++17")
 
 # Define the source files.
 set(SRCS
     src/main.cpp
-    src/bnb.cpp
+    src/graph.cpp
+    src/branch_and_bound.cpp
+    src/globals.cpp
 )
 
 # Define separate variables for each directory.
 set(BIN_DIR ${CMAKE_BINARY_DIR}/bin)
-set(OUTPUT_DIR ${CMAKE_BINARY_DIR}/output)
-set(LOG_DIR ${OUTPUT_DIR}/log)
+set(LOG_DIR ${CMAKE_BINARY_DIR}/output/log)
 
-# Create the directories.
+# Create both directories.
 file(MAKE_DIRECTORY ${BIN_DIR})
-file(MAKE_DIRECTORY ${OUTPUT_DIR})
 file(MAKE_DIRECTORY ${LOG_DIR})
 
 # Add the executable target and specify its output directory.
@@ -30,11 +30,10 @@ set_target_properties(solver PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
 # (Optional) Add a custom target for cleaning up generated files.
 add_custom_target(clean-all
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${BIN_DIR}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${OUTPUT_DIR}
-    COMMAND ${CMAKE_COMMAND} -E echo "Cleaned up bin and output directories."
+    COMMAND ${CMAKE_COMMAND} -E echo "Cleaned up bin directory."
 )
 
-# Generation of the run_benchmarks.sh script in the build folder.
+# Generation of the run_benchmarks.sh script in the build folder
 set(RUN_BENCHMARK_SCRIPT "${CMAKE_BINARY_DIR}/run_benchmarks.sh")
 
 file(WRITE "${RUN_BENCHMARK_SCRIPT}" "#!/bin/bash\n")
@@ -45,9 +44,9 @@ file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# located in the specified folders. For e
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# MPI process counts: 1, 2, 4, 8, 16, 32, and 64.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "#\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# The solver must be compiled and be available in the ../build/bin folder as \"solver\".\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# The solver accepts three arguments: <input_file>, <time_limit_sec> and --log.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# The solver accepts two arguments: <input_file> and <time_limit_sec>.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "#\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# The solver writes its results as a CSV file (<basename>.output) in ../build/output.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# The output file is expected to be written as <basename>.output in ../build/output.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# Define the MPI process counts to test.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "cpu_counts=(1 2 4 8 16 32 64)\n")
@@ -68,11 +67,11 @@ file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# Name of the MPI+OpenMP executable (change if necessary)\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "EXECUTABLE=\"$BIN_DIR/solver\"\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# CSV output file for aggregated benchmark results.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# CSV output file.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "OUTPUT_CSV=\"$OUTPUT_DIR/benchmark_results.csv\"\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# Write CSV header.\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "echo \"Instance,Size,Edges,BestSolution,Optimum,TotalTime(s),Threads_Per_Node,CPUs_Per_Node,Nodes\" > \"$OUTPUT_CSV\"\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "echo \"Folder,Input_File,CPU_Count,Problem_Instance,Vertices,Edges,Time_Limit,Worker_Processes,Cores_Per_Worker,Wall_Time,Within_Time_Limit,Colors\" > \"$OUTPUT_CSV\"\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "# Loop over the folders and input files.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "for folder in \"\${folders[@]}\"; do\n")
@@ -95,43 +94,43 @@ file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "        # For each requested MPI process count.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "        for np in \"\${cpu_counts[@]}\"; do\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            echo \"  Running with \$np MPI processes...\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Remove any previous output file.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            \n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # (Optional) Remove any previous output file so that we have a fresh run.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            output_file=\"$OUTPUT_DIR/\${base%.*}.output\"\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            if [[ -f \"\$output_file\" ]]; then\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                rm \"\$output_file\"\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            fi\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Run the executable using mpirun with --log enabled by default.\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            mpirun -np \"\$np\" \"\$EXECUTABLE\" \"\$input_file\" \"\$TIME_LIMIT\" --log\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Run the executable using mpirun.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            mpirun -np \"\$np\" \"\$EXECUTABLE\" \"\$input_file\" \"\$TIME_LIMIT\"\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Wait for the output file to be written.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Wait a moment for the file system to flush the output.\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            sleep 1\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Check if the expected output file was created and parse it if available.\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            if [[ -f \"\$output_file\" ]]; then\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                # Read the CSV output file generated by the solver. Skip the header line by taking the last line.\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                data=\$(tail -n 1 \"\$output_file\")\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                IFS=',' read -r instance size edges bestSolution optimum totalTime threadsPerNode cpusPerNode nodes <<< \"\$data\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            else\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                instance=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                size=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                edges=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                bestSolution=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                optimum=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                totalTime=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                threadsPerNode=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                cpusPerNode=\"N/A\"\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                nodes=\"N/A\"\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Check if the expected output file was created.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            if [[ ! -f \"\$output_file\" ]]; then\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                echo \"    Warning: Output file \$output_file not found.\"\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "                continue\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            fi\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Append a new row to the aggregated CSV file with the complete data from the .output file.\n")
-file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            echo \"\$instance,\$size,\$edges,\$bestSolution,\$optimum,\$totalTime,\$threadsPerNode,\$cpusPerNode,\$nodes\" >> \"$OUTPUT_CSV\"\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Parse key fields from the output file.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            problem_instance=\$(grep \"problem_instance_file_name:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            vertices=\$(grep \"number_of_vertices:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            edges=\$(grep \"number_of_edges:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            tlimit=\$(grep \"time_limit_sec:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            worker_processes=\$(grep \"number_of_worker_processes:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            cores=\$(grep \"number_of_cores_per_worker:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            wall_time=\$(grep \"wall_time_sec:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            within_time=\$(grep \"is_within_time_limit:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            colors=\$(grep \"number_of_colors:\" \"\$output_file\" | awk -F\": \" '{print \$2}')\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            # Append a new row to the CSV file.\n")
+file(APPEND "${RUN_BENCHMARK_SCRIPT}" "            echo \"\$folder,\$base,\$np,\$problem_instance,\$vertices,\$edges,\$tlimit,\$worker_processes,\$cores,\$wall_time,\$within_time,\$colors\" >> \"$OUTPUT_CSV\"\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "        done\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "    done\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "done\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "\n")
 file(APPEND "${RUN_BENCHMARK_SCRIPT}" "echo \"Benchmarking complete. Results saved in \$OUTPUT_CSV.\"\n")
 
-# Make the script executable.
+# Make the script executable
 file(CHMOD "${RUN_BENCHMARK_SCRIPT}" PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
