@@ -1,4 +1,4 @@
-[![Poster Preview](docs/Challenge_Summit_Krakow_page-0001.png)](/home/azurubuntu/repos/EuroHPC_Student_Challenge_2025_Team_6/docs/poster.pdf)
+[![Poster Preview](docs/Challenge_Summit_Krakow_page-0001.png)](docs/poster.pdf)
 
 ## Overview
 
