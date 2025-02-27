@@ -56,7 +56,7 @@ This file explains the installation and setup process.
 | Name | GitHub Account |
 |------|---------------|
 | **Alberto Taddei** | https://github.com/albtad01 |
-| **Arianna Amadini** | https://github.com/Arianna0709 |
+| **Arianna Amadini** | https://github.com/AriannaAmadini |
 | **Mario Capodanno** | https://github.com/MarioCapodanno |
 | **Valerio Grillo** | https://github.com/Valegrl |
 
