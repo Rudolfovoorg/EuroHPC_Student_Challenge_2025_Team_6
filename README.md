@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/c66320da-4686-4e5b-b4e4-ddc6ed35abb9)﻿# EuroHPC_Student_Challenge_2025_Team_6 x Graph Coloring Solver
+![https://raw.githubusercontent.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/main/Challenge_Summit_Krakow_page-0001.jpg]([https://github.com/user-attachments/assets/c66320da-4686-4e5b-b4e4-ddc6ed35abb9](https://github.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/blob/main/Challenge_Summit_Krakow.pdf))﻿# EuroHPC_Student_Challenge_2025_Team_6 x Graph Coloring Solver
 
 ## Overview
 
