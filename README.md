@@ -1,4 +1,4 @@
-[![Poster Preview](https://github.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/blob/main/Challenge_Summit_Krakow_page-0001.jpg?raw=true)](https://github.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/blob/main/Challenge_Summit_Krakow.pdf)
+[![Poster Preview](docs/Challenge_Summit_Krakow_page-0001.png)](/home/azurubuntu/repos/EuroHPC_Student_Challenge_2025_Team_6/docs/poster.pdf)
 
 ## Overview
 
