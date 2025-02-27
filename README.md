@@ -1,10 +1,8 @@
-![https://raw.githubusercontent.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/main/Challenge_Summit_Krakow_page-0001.jpg]([https://github.com/user-attachments/assets/c66320da-4686-4e5b-b4e4-ddc6ed35abb9](https://github.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/blob/main/Challenge_Summit_Krakow.pdf))﻿# EuroHPC_Student_Challenge_2025_Team_6 x Graph Coloring Solver
+[![Poster Preview](https://github.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/blob/main/Challenge_Summit_Krakow_page-0001.jpg?raw=true)](https://github.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/blob/main/Challenge_Summit_Krakow.pdf)
 
 ## Overview
 
 This project implements a parallel **Branch-and-Bound** algorithm for **Graph Coloring**, leveraging **MPI** and **OpenMP** to improve performance. The objective is to determine the **chromatic number** of a given graph while optimizing computational efficiency.
-
-[![Poster Preview](https://raw.githubusercontent.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/main/Challenge_Summit_Krakow_page-0001.jpg)](https://github.com/Rudolfovoorg/EuroHPC_Student_Challenge_2025_Team_6/blob/main/Challenge_Summit_Krakow.pdf)
 
 &nbsp;
 ## Features
